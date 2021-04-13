@@ -1,0 +1,33 @@
+{
+  "name": "pc-setup",
+  "version": "2.0.5",
+  "description": "Just an app that sets up your PC Apps and Environment variables after a reset.",
+  "author": {
+    "name": "Chiranthan Bharadwaj R",
+    "email": "chiranthan568@gmail.com"
+  },
+  "license": "MIT",
+  "engines": {
+    "npm": ">=6.5.0",
+    "node": ">=14.0.0"
+  },
+  "bugs": {
+    "url": "https://github.com/WickedWizard3588/PC-Setup",
+    "email": "chiranthan568@gmail.com"
+  },
+  "homepage": "https://github.com/WickedWizard3588/PC-Setup#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/WickedWizard3588/PC-Setup.git"
+  },
+  "dependencies": {},
+  "devDependencies": {},
+  "peerDependencies": {},
+  "optionalDependencies": {},
+  "keywords": [
+    "PC",
+    "Setup",
+    "Apps",
+    "Installer"
+  ]
+}
