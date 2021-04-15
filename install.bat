@@ -105,6 +105,8 @@ for /l %%i in (0,1,100) do (
     echo Setting Cmder Vars
     setx CMDER_ROOT %CmderInstallDirectory% /m
 
+    Cmder /REGISTER USER
+
     echo Copying FFmpeg
     robocopy %FFmpegDirectory% %FFmpegInstallDirectory% /E /V
     echo Set FFmpeg Vars Already
