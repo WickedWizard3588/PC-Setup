@@ -20,17 +20,19 @@ Rename `config.example.bat` to `config.bat` and fill the file.
 Run the install.bat File
 
 ## Prerequisites
-Install Cmder (If needed)<br>
 ~~Install FFmpeg (If needed)~~ No longer needed, thanks to an idea from [SpeckyYT](https://github.com/SpeckyYT/) and [BlackWolfWoof](https://github.com/BlackWolfWoof)<br>
-None, not even Nodejs. Just a PC is enough.
+Just a PC and Cmder (If you want it) are enough.
 
 # How it works?
 Basically, when you set your config in the `config.bat` file, and run the `install.bat` file, it first installs Chocolatey. [Chocolatey/Choco](https://chocolatey.org/) is a package manager for Windows, like `APT` in Ubuntu and `Homebrew` in Mac. Then, Choco loops through the array you set in the config file. (Allows up to 14 packages.)
 
 # Backup
-As you know, I'm not responsible if this blows up, as per the [LICENSE](https://github.com/WickedWizard3588/PC-Setup/blob/master/LICENSE). So, you might want to take a whole Registry Backup (Not recommended) or a Backup of your just ENV Variables. 
+As this Program Indirectly modifies your Registry, it can be harmful, but only for your Environment Variables.
 
-If neither options seem nice, you can create a System Restore Point to restore back easily. 
+How does it modify the Registry?
+All your Environment Variables are stored in the registry. We read the Environment Variables from there. If there is any messing with the Registry, it will most probably be with your PATH Variables.
+
+So, I recommend you to take backup by reading the [Backup.md](https://github.com/WickedWizard3588/PC-Setup/blob/master/Backup.md) file.
 
 > This might be integrated into the Project later
 

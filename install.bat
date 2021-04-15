@@ -18,13 +18,34 @@ echo I will also make sure that the ENV Variables are set perfectly.
 echo Thank you for giving me Admin Perms
 
 PAUSE
+goto RestorePoint
 
+:RestorePoint
+    set /p question=Shall I create a restore point? (Y/N) 
+    if /i "%question:~,1%" EQU "Y" goto create
+    if /i "%question:~,1%" EQU "N" goto choco
+    echo Please type Y for Yes or N for No
+    goto RestorePoint
+:--------------------------------------
+
+:create
+    set /p restore=Please give a name for your restore point. Date and Time will be added automatically. 
+    set /p MainDrive=Please give the name for your Windows Drive. (By default, C:) 
+    echo Enabling SystemRestore (If not enabled) 
+    powershell -Command "Enable-ComputerRestore -Drive %MainDrive%"
+    echo Creating RestorePoint
+    Wmic.exe /Namespace:\\root\default Path SystemRestore Call CreateRestorePoint "%restore%", 100, 12
+    goto choco
+:--------------------------------------
+
+:: Chocolatey Install
+:choco
 echo Checking config
 call config.bat
 
-:: Chocolatey Install
 echo Installing Choco
 @"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command "[System.Net.ServicePointManager]::SecurityProtocol = 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))" && SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"
+:--------------------------------------
 
 choco feature enable -n allowGlobalConfirmation
 :: Disables Choco installing Confirmation so that we don't need to answer prompts each time.
@@ -53,7 +74,7 @@ for /l %%i in (0,1,100) do (
     :: Asks for confirmation.
     echo Shall I go ahead with Cmder and FFmpeg?
     echo If yes, press any key to continue.
-    echo If no, press Alt + F4.
+    echo If no, click the close button (DO NOT PRESS ALT + F4).
     echo If you wish to continue, I will install 7-Zip.
     echo You can uninstall it later, through a prompt I'll give you :)
     PAUSE
@@ -92,7 +113,7 @@ for /l %%i in (0,1,100) do (
 :7zip
     echo Do you want to uninstall 7zip?
     echo If yes, click Enter
-    echo If no, click Alt + F4 and you can quit the installation safely
+    echo If no, click the close button (DO NOT USE ALT + F4) and you can quit the installation safely
     PAUSE
     choco uninstall 7zip
 
