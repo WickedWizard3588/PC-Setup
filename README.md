@@ -5,7 +5,7 @@
   </a>
 </p>
 
-### This can now be considered STABLE and can be used to install your PC apps. This can even install FFmpeg and Cmder, if the folders are already installed and the location is specified. (FFmpeg installation folders are no longer neccessary.)
+### NOTE:- I've just noticed that all installations from Chocolatey are getting corrupt, so this will be shifting to only `GET` requests.
 
 You can read the Comments in each file, and know what it does :_) Enjoy
 

@@ -53,7 +53,7 @@ const installFFmpeg = (rl) => {
     })
 };
 
-const questions = (rl, what) => {
+const questions = (rl, what, yes = true) => {
     rl.question(`${what}\n`, (answer) => {
         answer = answer.toLowerCase();
         if(answer == 'n') installFFmpeg(rl);

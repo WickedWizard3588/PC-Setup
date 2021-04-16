@@ -30,7 +30,7 @@ goto RestorePoint
 
 :create
     set /p restore=Please give a name for your restore point. Date and Time will be added automatically. 
-    set /p MainDrive=Please give the name for your Windows Drive. (By default, C:) 
+    set /p MainDrive=Please give the name for your Windows Drive. (Example: C:) DO NOT USE `\\` 
     echo Enabling SystemRestore (If not enabled) 
     powershell -Command "Enable-ComputerRestore -Drive %MainDrive%"
     echo Creating RestorePoint
