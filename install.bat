@@ -120,6 +120,7 @@ for /l %%i in (0,1,100) do (
     choco uninstall 7zip
 
     echo Uninstalled 7zip. Now quitting.
+    call refreshenv.cmd
     PAUSE
     exit
 :--------------------------------------
