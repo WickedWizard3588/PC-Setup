@@ -5,8 +5,6 @@
   </a>
 </p>
 
-### NOTE:- I've just noticed that all installations from Chocolatey are getting corrupt, so this will be shifting to only `GET` requests.
-
 You can read the Comments in each file, and know what it does :_) Enjoy
 
 > Just an app that sets up your PC Apps and Environment variables after a reset.

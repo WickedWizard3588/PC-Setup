@@ -9,6 +9,7 @@ let url = 'https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-4.4-full_build.7z'
 const { exec, execSync } = require('child_process');
 const { get } = require('https');
 const { appendFileSync } = require('fs');
+const readline = require('readline');
 
 get('https://www.gyan.dev/ffmpeg/builds/release-version', (response) => {
     response
@@ -111,7 +112,7 @@ over.then(async () => {
         .on('data', console.log) // Few Events
         .on('error', console.log);
     questions(
-        require('readline').createInterface({
+        readline.createInterface({
             input: process.stdin,
             output: process.stdout,
         }), 
