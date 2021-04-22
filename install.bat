@@ -18,34 +18,18 @@ echo I will also make sure that the ENV Variables are set perfectly.
 echo Thank you for giving me Admin Perms
 
 PAUSE
-goto RestorePoint
 
-:RestorePoint
-    set /p question=Shall I create a restore point? (Y/N) 
-    if /i "%question:~,1%" EQU "Y" goto create
-    if /i "%question:~,1%" EQU "N" goto choco
-    echo Please type Y for Yes or N for No
-    goto RestorePoint
-:--------------------------------------
-
-:create
-    set /p restore=Please give a name for your restore point. Date and Time will be added automatically. 
-    set /p MainDrive=Please give the name for your Windows Drive. (Example: C:) DO NOT USE `\\` 
-    echo Enabling SystemRestore (If not enabled) 
-    powershell -Command "Enable-ComputerRestore -Drive %MainDrive%"
-    echo Creating RestorePoint
-    Wmic.exe /Namespace:\\root\default Path SystemRestore Call CreateRestorePoint "%restore%", 100, 12
-    goto choco
-:--------------------------------------
+echo Enabling SystemRestore (If not enabled) 
+powershell -Command "Enable-ComputerRestore -Drive C:"
+echo Creating RestorePoint
+Wmic.exe /Namespace:\\root\default Path SystemRestore Call CreateRestorePoint "Before Apps Installation", 100, 12
 
 :: Chocolatey Install
-:choco
 echo Checking config
 call config.bat
 
 echo Installing Choco
 @"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command "[System.Net.ServicePointManager]::SecurityProtocol = 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))" && SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"
-:--------------------------------------
 
 choco feature enable -n allowGlobalConfirmation
 :: Disables Choco installing Confirmation so that we don't need to answer prompts each time.
@@ -110,17 +94,14 @@ for /l %%i in (0,1,100) do (
     echo Copying FFmpeg
     robocopy %FFmpegDirectory% %FFmpegInstallDirectory% /E /V
     echo Set FFmpeg Vars Already
+
+    goto 7zip
 :--------------------------------------
 
 :7zip
-    echo Do you want to uninstall 7zip?
-    echo If yes, click Enter
-    echo If no, click the close button (DO NOT USE ALT + F4) and you can quit the installation safely
-    PAUSE
-    choco uninstall 7zip
-
-    echo Uninstalled 7zip. Now quitting.
-    call refreshenv.cmd
-    PAUSE
-    exit
+    set /p zip=Do you want to uninstall 7zip? (Y/N) 
+    if /i "%answer:~,1%" EQU "Y" choco uninstall 7zip && goto choco
+    if /i "%answer:~,1%" EQU "N" echo Exiting && exit
+    echo Please enter a valid answer. Reprompting
+    goto 7zip
 :--------------------------------------

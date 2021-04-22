@@ -1,10 +1,11 @@
 config.bat
-node_modules
 
 # Files installed by script, like ffmpeg
-ffmpeg.7z
-ffmpeg-4.4-full_build
+*.7z
+*.zip
+ffmpeg-4.4-full_build*
+Cmder*
 
 # My Test Files
-test.bat
-test.js
+test.*
+test.*

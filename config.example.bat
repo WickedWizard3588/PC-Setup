@@ -23,8 +23,17 @@ set app[11]=YOUR_APP_NAME_HERE
 set app[12]=YOUR_APP_NAME_HERE
 set app[13]=YOUR_APP_NAME_HERE
 set app[14]=YOUR_APP_NAME_HERE
+set BSODLogging=0x3
+:: There are 4 types of logging here,
+:: Option:-
+:: `0x0` No Logging
+:: `0x1` Complete Memory Dump
+:: `0x2` Kernel Memory Dump
+:: `0x3` Small Memory Dump
+:: `0x7` Automatic Memory Dump
 
 :: You can now install upto 100 apps. If you need to install just 25 apps, then the last line should be
 :: set app[25]=APP_NAME
 :: You can leave it empty after this
 :: The install.bat will take care of it.
+:: Make sure the apps that you want to install are present here https://community.chocolatey.org/packages

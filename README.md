@@ -1,43 +1,21 @@
 <h1 align="center">Welcome to PC-Setup 👋</h1>
-<p>
-  <a href="https://github.com/WickedWizard3588/PC-Setup/graphs/commit-activity" target="_blank">
-    <img alt="Maintenance" src="https://img.shields.io/badge/Maintained%3F-yes-green.svg" />
-  </a>
-</p>
 
-You can read the Comments in each file, and know what it does :_) Enjoy
+## What is this?
+`PC-Setup` is a script which reinstalls all your Windows 10 apps using Chocolatey, the Package Manager for Windows.
+You just need to download and unzip this repo, rename the `config.example.bat` to `config.bat`, fill it, and run your `install.bat` file. Also, make sure that the app you are trying to install is available [here](https://community.chocolatey.org/packages).
 
-> Just an app that sets up your PC Apps and Environment variables after a reset.
+**Disclaimer:** This app indirectly modifies your PC's Registry which can be harmful. Fortunately, we create a System Restore Point just before we start, so that we can revert back easily.
 
-Disclaimer: Works on Windows 10, unless your Registry is broken. 
-> Should work on Windows 8, 7 (Untested)
+This script also sets your BSOD (Blue Screen of Death) Dump Files to the `MiniDump` option, so its easy for you to debug and fix them ;)
 
-## Usage
-Download this repo and unzip it.
-Rename `config.example.bat` to `config.bat` and fill the file.
-Run the install.bat File
+PS:- If you're a fan of [Cmder](https://cmder.net/) and [FFmpeg](https://www.ffmpeg.org/), this app automatically installs Cmder and FFmpeg for you, including the Environment Variables. 
+### Prerequisites
+None
 
-## Prerequisites
-~~Install FFmpeg (If needed)~~ No longer needed, thanks to an idea from [SpeckyYT](https://github.com/SpeckyYT/) and [BlackWolfWoof](https://github.com/BlackWolfWoof)<br>
-Just a PC and Cmder (If you want it) are enough.
-
-# How it works?
-Basically, when you set your config in the `config.bat` file, and run the `install.bat` file, it first installs Chocolatey. [Chocolatey/Choco](https://chocolatey.org/) is a package manager for Windows, like `APT` in Ubuntu and `Homebrew` in Mac. Then, Choco loops through the array you set in the config file. (Allows up to 14 packages.)
-
-# Backup
-As this Program Indirectly modifies your Registry, it can be harmful, but only for your Environment Variables.
-
-How does it modify the Registry?
-All your Environment Variables are stored in the registry. We read the Environment Variables from there. If there is any messing with the Registry, it will most probably be with your PATH Variables.
-
-So, I recommend you to take backup by reading the [Backup.md](https://github.com/WickedWizard3588/PC-Setup/blob/master/Backup.md) file.
-
-> This might be integrated into the Project later
-
-# Contributing
+### Contributing
 If you want to contribute to this project, feel free to do so. Just make sure that the idea is appealing and you have a nice way of implementing it.
 
-# License 
+### License 
 > THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 > IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 > FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
