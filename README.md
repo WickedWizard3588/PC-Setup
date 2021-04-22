@@ -13,8 +13,7 @@ PS:- If you're a fan of [Cmder](https://cmder.net/) and [FFmpeg](https://www.ffm
 ### Prerequisites
 None
 
-### Contributing
-If you want to contribute to this project, feel free to do so. Just make sure that the idea is appealing and you have a nice way of implementing it.
+_If you find a bug, or have new Ideas, please feel free to open an issue or PR or contact me through [Discord](http://discord.com/users/719421577086894101)_
 
 ### License 
 > THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
