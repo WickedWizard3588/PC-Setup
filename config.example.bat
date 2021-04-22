@@ -23,6 +23,9 @@ set app[11]=YOUR_APP_NAME_HERE
 set app[12]=YOUR_APP_NAME_HERE
 set app[13]=YOUR_APP_NAME_HERE
 set app[14]=YOUR_APP_NAME_HERE
+
+:: Make sure the below option is defined, else it will break your BSOD Logging, in the Registry.
+:: Leave it as it is if you don't understand it
 set BSODLogging=0x3
 :: There are 4 types of logging here,
 :: Option:-

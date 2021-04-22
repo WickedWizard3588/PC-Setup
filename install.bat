@@ -48,10 +48,17 @@ for /l %%i in (0,1,100) do (
 :: This is an example prompt, to just show how this works.
 :discord 
     set /p answer=Do you want to install Discord? (Y/N) 
-    if /i "%answer:~,1%" EQU "Y" choco install discord && goto Env
-    if /i "%answer:~,1%" EQU "N" goto Env
+    if /i "%answer:~,1%" EQU "Y" choco install discord && goto BSOD
+    if /i "%answer:~,1%" EQU "N" goto BSOD
     echo Please type Y for Yes or N for No
     goto discord
+:--------------------------------------
+
+:BSOD
+    echo Setting your BSOD Logging Type to %BSODLogging%
+    echo yes | reg delete "HKLM\System\CurrentControlSet\Control\CrashControl\CrashDumpEnabled"
+    reg add "HKLM\System\CurrentControlSet\Control\CrashControl\CrashDumpEnabled" /d %BSODLogging% /t REG_DWORD
+    goto Env
 :--------------------------------------
 
 :Env
