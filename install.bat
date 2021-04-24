@@ -54,6 +54,8 @@ for /l %%i in (0,1,100) do (
     goto discord
 :--------------------------------------
 
+cls
+
 :BSOD
     echo Setting your BSOD Logging Type to %BSODLogging%
     echo yes | reg delete "HKLM\System\CurrentControlSet\Control\CrashControl\CrashDumpEnabled"
@@ -62,6 +64,7 @@ for /l %%i in (0,1,100) do (
 :--------------------------------------
 
 :Env
+    cls
     :: Asks for confirmation.
     echo Shall I go ahead with Cmder and FFmpeg?
     echo If yes, press any key to continue.

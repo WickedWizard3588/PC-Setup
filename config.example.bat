@@ -8,6 +8,7 @@ set FFmpegInstallDirectory=YOUR_DIRECTORY_HERE
 set FFmpegDirectory=YOUR_DIRECTORY_HERE
 set setupFilesDirectory=YOUR_DIRECTORY_HERE
 set codingDirectory=YOUR_DIRECTORY_HERE
+
 set app[0]=YOUR_APP_NAME_HERE
 set app[1]=YOUR_APP_NAME_HERE
 set app[2]=YOUR_APP_NAME_HERE

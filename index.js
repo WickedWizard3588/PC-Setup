@@ -4,8 +4,7 @@
 
 const commands = ['"HKLM\\System\\CurrentControlSet\\Control\\Session Manager\\Environment" /v Path', 'HKCU\\Environment /v Path'];
 // Locations where the Environment variables are stored in the registry.
-let ffmpegurl = 'https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-4.4-full_build.7z';
-let cmderurl;
+let ffmpegurl, cmderurl;
 // URL from where we perform a GET request and install FFmpeg
 const { exec, execSync } = require('child_process');
 const { get } = require('https');
@@ -24,6 +23,11 @@ NOTE:- The filename should be "cmder.zip" (Case Sensitive)
 
 After the download is complete, press enter.
 You DO NOT need to unzip it :)
+
+**IMPORTANT:- Some browsers like Microsoft Edge, just directly save it to the Downloads Folder ("%USERPROFILE%\\Downloads").
+You can copy paste it from there.
+
+PS:- %USERPROFILE%\\Downloads === C:\\Users\\<Username>\\Downloads**
 `;
 
 const execedsync = async (command) => { // A constant to make my job easier
@@ -53,7 +57,7 @@ const ffmpegversion = new Promise ((resolve) => {
 const cmderversion = new Promise ((resolve) => {
     exec('curl -s https://api.github.com/repos/cmderdev/cmder/releases/latest', (err, results) => {
         results = JSON.parse(results);
-        results.assets.forEach(result => {
+        results.assets.forEach((result) => {
             if(result.name != 'cmder_mini.zip') return;
             cmderurl = result.browser_download_url;
             resolve(cmderurl);
@@ -135,14 +139,16 @@ const myCustomSetup = async (userVars) => {
     const defaultgiteditor = await (await execedsync('set GitDefaultEditor')).split('=')[1];
     const installation = await (await execedsync('set Installation')).split('=')[1];
     const kms = await (await execedsync('set KMSDirectory')).split('=')[1];
+    const notmyfault = await (await execedsync('set NotMyFault')).split('=')[1];
 
-    execed(`setx PATH "${userVars}${tasksdirectory.trim()};${nirsoftDirectory.trim()};${sixtyfourbit.trim()};${debugging.trim()};${primeninetyfive.trim()};${memtest.trim()};${kms.trim()};${installation.trim()}"`) // Trim and set the variables, so that there are no whitespaces.
+    execed(`setx PATH "${userVars}${tasksdirectory.trim()};${nirsoftDirectory.trim()};${sixtyfourbit.trim()};${debugging.trim()};${primeninetyfive.trim()};${memtest.trim()};${kms.trim()};${installation.trim()};${notmyfault.trim()}"`) // Trim and set the variables, so that there are no whitespaces.
         .on('data', console.log) // Just a few Events.
         .on('error', console.log);
 
     await execedsync(`git config --global core.editor "${defaultgiteditor}"`);
     console.log(`Set the default Git editor to ${defaultgiteditor}`);
 }
+
 ffmpegversion.then(() => {
     cmderversion.then(() => {
         let data = []; // Define data, ofc
