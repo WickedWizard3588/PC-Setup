@@ -28,6 +28,12 @@
 		"PC",
 		"Setup",
 		"Apps",
-		"Installer"
-	]
+		"Installer",
+		"PC-Setup",
+		"Chocolatey",
+		"Choco",
+		"Batch",
+		"Javascript"
+	],
+	"private": true
 }

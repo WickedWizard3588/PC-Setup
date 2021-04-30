@@ -6,7 +6,7 @@ You just need to download and unzip this repo, rename the `config.example.bat` t
 
 **Disclaimer:** This app indirectly modifies your PC's Registry which can be harmful. Fortunately, we create a System Restore Point just before we start, so that we can revert back easily.
 
-This script also sets your BSOD (Blue Screen of Death) Dump Files to the `MiniDump` option, so its easy for you to debug and fix them ;)
+This script also sets your BSOD (Blue Screen of Death) Dump Files to the `MiniDump` (by default) option, so its easy for you to debug and fix them ;)
 
 PS:- If you're a fan of [Cmder](https://cmder.net/) and [FFmpeg](https://www.ffmpeg.org/), this app automatically installs Cmder and FFmpeg for you, including the Environment Variables. 
 

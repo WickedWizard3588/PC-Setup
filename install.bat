@@ -57,10 +57,17 @@ for /l %%i in (0,1,100) do (
 cls
 
 :BSOD
-    echo Setting your BSOD Logging Type to %BSODLogging%
-    echo yes | reg delete "HKLM\System\CurrentControlSet\Control\CrashControl\CrashDumpEnabled"
-    reg add "HKLM\System\CurrentControlSet\Control\CrashControl\CrashDumpEnabled" /d %BSODLogging% /t REG_DWORD
-    goto Env
+    if defined BSODLogging (
+        echo Setting your BSOD Logging Type to %BSODLogging%
+        REG ADD "HKLM\System\CurrentControlSet\Control\fCrashControl" /v CrashDumpEnabled /d %BSODLogging% /t REG_DWORD /f
+        goto Env
+    ) else (
+        set /p BSODQuestion=BSODLogging Variable has not been set. Do you want me to set it to the default Small Memory Dump (Y) or leave it (N) 
+        if /i "%BSODQuestion:~,1%" EQU "Y" REG ADD "HKLM\System\CurrentControlSet\Control\fCrashControl" /v CrashDumpEnabled /d 0x3 /t REG_DWORD /f && goto Env
+        if /i "%BSODQuestion:~,1%" EQU "N" echo Ok, skipping && goto Env
+        echo Please type Y for Yes or N for No
+        goto BSOD
+    )
 :--------------------------------------
 
 :Env
@@ -96,10 +103,11 @@ cls
     echo Copying Cmder
     robocopy %CmderDirectory% %CmderInstallDirectory% /E /V
 
+    Cmder /REGISTER USER
+
     echo Setting Cmder Vars
     setx CMDER_ROOT %CmderInstallDirectory% /m
 
-    Cmder /REGISTER USER
 
     echo Copying FFmpeg
     robocopy %FFmpegDirectory% %FFmpegInstallDirectory% /E /V
