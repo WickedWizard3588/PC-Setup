@@ -4,7 +4,7 @@
 
 const commands = ['"HKLM\\System\\CurrentControlSet\\Control\\Session Manager\\Environment" /v Path', 'HKCU\\Environment /v Path'];
 // Path in the Registry, from where we get the PATH Variables
-let ffmpegurl, cmderurl, data = [];
+let ffmpegurl, cmderurl;
 // Define ffmpegurl, cmderurl and data
 
 // Imports
@@ -36,6 +36,20 @@ You can copy paste it from there.
 PS:- %USERPROFILE%\\Downloads === C:\\Users\\<Username>\\Downloads**
 `;
 
+// A constant that executes the String Command given and returns the output
+const execedsync = async (command) => {
+    const data = await execSync(command).toString();
+    return data;
+};
+
+// A constant that executes the String Command given and return the Stdout to us, allowing better flexibility
+const execed = (command) => {
+    const data = exec(command, (err) => {
+        if(err) return console.error('ERROR:', err);
+    });
+    return data.stdout;
+};
+
 // Returns a Promise, and sets the FFmpeg URL
 const ffmpegversion = new Promise((resolve) => {
     get('https://www.gyan.dev/ffmpeg/builds/release-version', (response) => {
@@ -58,9 +72,10 @@ const cmderversion = new Promise((resolve) => {
             cmderurl = result.browser_download_url;
             resolve(cmderurl);
         });
-    })
+    });
 });
 
+let data = [];
 // Returns a promise and sets the Environment Variables
 const dataed = new Promise((resolve) => {
     commands.forEach((command) => {
@@ -76,44 +91,9 @@ const dataed = new Promise((resolve) => {
     });
 });
 
-(async () => {
-    await ffmpegversion;
-    await cmderversion;
-    await dataed;
-    const [ systemVars, userVars ] = data;
-    const ffmpeg = await (await execedsync('set FFmpegInstallDirectory')).split('=')[1];
-    const cmder = await (await execedsync('set CmderInstallDirectory')).split('=')[1];
-    const programFiles = await (await execedsync('set ProgramFiles')).split('=')[1].replace('ProgramFiles(x86)', '');
-    execed(`setx PATH "${systemVars}${ffmpeg.trim()};${cmder.trim()};${`${programFiles.trim()}\\MongoDB\\Server\\${mongodb.trim()}\\bin`}" /m`) // Trim and set the variables, so that there are no whitespaces.
-        .on('data', console.log)
-        .on('error', console.log);
-    execed(`setx %ConEmuDir% "${cmder.trim()}\\vendor\\conemu-maximus5" /m`)
-        .on('data', console.log)
-        .on('error', console.log);
-    await questions('Did you install FFmpeg? Type "Y" for Yes and "N" for No. \nIf you haven\'t installed, this will install it.', true, `${programFiles.trim()}\\7-Zip\\7z.exe`);
-    await questions('Did you install Cmder? Type "Y" for Yes and "N" for No. \nIf you haven\'t installed, this will install it', false, `${programFiles.trim()}\\7-Zip\\7z.exe`);
-
-    // You can comment out the below line, as it is meant for my purpose, i.e. my custom ENV Vars
-    myCustomSetup(userVars);
-})();
-
-// A constant that executes the String Command given and returns the output
-async function execedsync(command) {
-    const data = await execSync(command).toString();
-    return data;
-};
-
-// A constant that executes the String Command given and return the Stdout to us, allowing better flexibility
-function execed(command) {
-    const data = exec(command, (err) => {
-        if(err) return console.error('ERROR:', err);
-    });
-    return data.stdout;
-};
-
 // Installs Cmder from the CmderURL
-function installCmder(path) {
-    return new Promise(async (resolve) => {
+const installCmder = (path) => {
+    return new Promise((resolve) => {
         const rl = readline.createInterface({
             input,
             output,
@@ -124,7 +104,7 @@ function installCmder(path) {
             rl.question('Done? \n', async () => {
                 rl.close();
                 await execed(`${path} x "${process.cwd()}\\cmder.zip" *.* "${process.cwd()}\\Cmder"`)
-                    .on('data', (data) => console.log('Result:', data))
+                    .on('data', (got) => console.log('Result:', got))
                     .on('error', (err) => console.log('Error:', err));
                 await execedsync(`set CmderDirectory="${process.cwd()}\\Cmder`);
                 return resolve(true);
@@ -134,20 +114,19 @@ function installCmder(path) {
 };
 
 // Installs FFmpeg from the FFmpegURL
-function installFFmpeg(path) {
+const installFFmpeg = (path) => {
     return new Promise((resolve, reject) => {
         get(ffmpegurl, (response) => {
             console.log('Installing FFmpeg');
             response
-                .on('data', (data) => appendFileSync('ffmpeg.7z', data))
+                .on('data', (got) => appendFileSync('ffmpeg.7z', got))
                 .on('end', async () => {
                     console.log('Finished Installing. \nOpening the ZIP File');
                     await execed(`${path} x "${process.cwd()}\\ffmpeg.7z" *.* "${process.cwd()}"`)
-                        .on('data', (data) => console.log('Result:', data))
+                        .on('data', (got) => console.log('Result:', got))
                         .on('error', (err) => console.log('Error:', err));
                     console.log('Changing FFmpegDirectory to current directory.');
-                    let filename = url.split('/').pop().split('7')[0].split('.');
-                    filename = `${url[0]}.${url[1]}`;
+                    const filename = ffmpegurl.replace('.7z', '');
                     await execedsync(`set FFmpegDirectory="${process.cwd()}\\${filename}"`);
                     return resolve(true);
                 })
@@ -155,19 +134,19 @@ function installFFmpeg(path) {
                     console.log('ERROR:', err);
                     reject(err);
                 });
-        })
+        });
     });
 };
 
 // Questions to be asked in the console
-function questions(what, type = true, path) {
+const questions = (what, type = true, path) => {
     const rl = readline.createInterface({
         input,
         output,
     });
     return new Promise((resolve) => {
         rl.question(`${what}\n`, async (answer) => {
-            rl.close()
+            rl.close();
             answer = answer.toLowerCase();
             if(answer == 'n') await type ? installFFmpeg(path) : installCmder(path);
             else if(answer == 'y') console.log('Ok, moving ahead :)');
@@ -177,12 +156,12 @@ function questions(what, type = true, path) {
     });
 };
 
-async function myCustomSetup(userVars) {
+const myCustomSetup = async (userVars) => {
     let allvars = [];
     const envvars = ['Debugging', 'Linpack', 'NirLauncher', 'PrimeNinetyFive', 'Tasks', 'Installation', 'KMS'];
     const pathVars = new Promise((resolve) => {
         envvars.forEach(async (envVar) => {
-            const eachvar = await (await execedsync(`set ${envVar}`)).split('=')[1]
+            const eachvar = await (await execedsync(`set ${envVar}`)).split('=')[1];
             allvars = [...allvars, eachvar.trim().endsWith(';') ? eachvar.trim() : `${eachvar.trim()};`];
             resolve(allvars);
         });
@@ -200,7 +179,31 @@ async function myCustomSetup(userVars) {
 
     await execedsync(`git config --global core.editor "${defaultgiteditor}"`);
     console.log(`Set the default Git editor to ${defaultgiteditor}`);
-    
+
     await execedsync(`git config --global user.name "${name}" && git config --global user.email "${email}"`);
-    console.log('Set the default Git Email...')
+    console.log('Set the default Git Email...');
 };
+
+ffmpegversion.then(() => {
+    cmderversion.then(() => {
+        dataed.then(async () => {
+            const [ systemVars, userVars ] = data;
+            const ffmpeg = await (await execedsync('set FFmpegInstallDirectory')).split('=')[1];
+            const cmder = await (await execedsync('set CmderInstallDirectory')).split('=')[1];
+            const programFiles = await (await execedsync('set ProgramFiles')).split('=')[1].replace('ProgramFiles(x86)', '');
+            let mongodb = await (await execedsync('choco search mongodb -e')).split('mongodb ')[1].split(' ')[0].split('.');
+            mongodb = `${mongodb[0]}.${mongodb[1]}`;
+            execed(`setx PATH "${systemVars}${ffmpeg.trim()};${cmder.trim()};${`${programFiles.trim()}\\MongoDB\\Server\\${mongodb.trim()}\\bin`}" /m`) // Trim and set the variables, so that there are no whitespaces.
+                .on('data', console.log)
+                .on('error', console.log);
+            execed(`setx %ConEmuDir% "${cmder.trim()}\\vendor\\conemu-maximus5" /m`)
+                .on('data', console.log)
+                .on('error', console.log);
+            await questions('Did you install FFmpeg? Type "Y" for Yes and "N" for No. \nIf you haven\'t installed, this will install it.', true, `${programFiles.trim()}\\7-Zip\\7z.exe`);
+            await questions('Did you install Cmder? Type "Y" for Yes and "N" for No. \nIf you haven\'t installed, this will install it', false, `${programFiles.trim()}\\7-Zip\\7z.exe`);
+
+            // You can comment out the below line, as it is meant for my purpose, i.e. my custom ENV Vars
+            myCustomSetup(userVars);
+        });
+    });
+});
