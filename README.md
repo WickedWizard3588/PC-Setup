@@ -13,6 +13,8 @@ PS:- If you're a fan of [Cmder](https://cmder.net/) and [FFmpeg](https://www.ffm
 ### Prerequisites
 None
 
+Please do not download the Source Code from the repo directly, since it is in the middle of a rewrite. Instead, download the [Latest Release](https://github.com/WickedWizard3588/PC-Setup/releases)
+
 _If you find a bug, or have new Ideas, please feel free to open an issue or PR or contact me through [Discord](http://discord.com/users/719421577086894101)_
 
 ### License 
