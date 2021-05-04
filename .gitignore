@@ -4,12 +4,11 @@ node_modules
 # Files installed by script, like FFmpeg and Cmder
 *.7z
 *.zip
-ffmpeg-4.4-full_build*
-Cmder*
+ffmpeg-*-full_build*.*
+Cmder*.*
 
-# My Test Files
-test.*
-test.*
+# Rewrite
+Rewrite
 
-# Old Code
-Old Code
+# Test Files
+test*.*

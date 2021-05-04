@@ -19,10 +19,19 @@ echo Thank you for giving me Admin Perms
 
 PAUSE
 
+echo Checking Internet Connection
+Ping www.google.nl -n 1 -w 1000
+cls
+if errorlevel 1 (
+    echo You have not connected to the Internet. I will quit the Script. Please start again after connecting to the Internet
+    PAUSE
+    exit
+)
+
+
 echo Enabling SystemRestore (If not enabled) 
 powershell -Command "Enable-ComputerRestore -Drive C:"
-echo Creating RestorePoint
-Wmic.exe /Namespace:\\root\default Path SystemRestore Call CreateRestorePoint "Before Apps Installation", 100, 12
+powershell -ExecutionPolicy Bypass -Command "Checkpoint-Computer -Description \"Before Apps Installation\" -RestorePointType \"MODIFY_SETTINGS\""
 
 :: Chocolatey Install
 echo Checking config
@@ -47,10 +56,10 @@ for /l %%i in (0,1,100) do (
 
 :: This is an example prompt, to just show how this works.
 :discord 
-    set /p answer=Do you want to install Discord? (Y/N) 
-    if /i "%answer:~,1%" EQU "Y" choco install discord && goto BSOD
-    if /i "%answer:~,1%" EQU "N" goto BSOD
-    echo Please type Y for Yes or N for No
+    set /p discordinstall=Do you want to install Discord? (Y/N) 
+    if /i "%discordinstall:~,1%" EQU "Y" choco install discord && goto BSOD
+    if /i "%discordinstall:~,1%" EQU "N" goto BSOD
+    echo Please type Y/N
     goto discord
 :--------------------------------------
 
@@ -64,8 +73,8 @@ cls
     ) else (
         set /p BSODQuestion=BSODLogging Variable has not been set. Do you want me to set it to the default Small Memory Dump (Y) or leave it (N) 
         if /i "%BSODQuestion:~,1%" EQU "Y" REG ADD "HKLM\System\CurrentControlSet\Control\fCrashControl" /v CrashDumpEnabled /d 0x3 /t REG_DWORD /f && goto Env
-        if /i "%BSODQuestion:~,1%" EQU "N" echo Ok, skipping && goto Env
-        echo Please type Y for Yes or N for No
+        if /i "%BSODQuestion:~,1%" EQU "N" echo "Ok, skipping" && goto Env
+        echo Please type Y/N
         goto BSOD
     )
 :--------------------------------------
@@ -118,8 +127,8 @@ cls
 
 :7zip
     set /p zip=Do you want to uninstall 7zip? (Y/N) 
-    if /i "%answer:~,1%" EQU "Y" choco uninstall 7zip && goto choco
-    if /i "%answer:~,1%" EQU "N" echo Exiting && exit
+    if /i "%zip:~,1%" EQU "Y" choco uninstall 7zip && goto choco
+    if /i "%zip:~,1%" EQU "N" echo Exiting && exit
     echo Please enter a valid answer. Reprompting
     goto 7zip
 :--------------------------------------

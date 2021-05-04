@@ -1,6 +1,6 @@
 {
 	"name": "pc-setup",
-	"version": "2.0.8",
+	"version": "2.0.9",
 	"description": "Just an app that sets up your PC Apps and Environment variables after a reset.",
 	"author": {
 		"name": "Chiranthan Bharadwaj R",
@@ -33,7 +33,8 @@
 		"Chocolatey",
 		"Choco",
 		"Batch",
-		"Javascript"
+		"Javascript",
+		"Dependency-less"
 	],
 	"private": true
 }

@@ -4,14 +4,17 @@
 
 const commands = ['"HKLM\\System\\CurrentControlSet\\Control\\Session Manager\\Environment" /v Path', 'HKCU\\Environment /v Path'];
 // Path in the Registry, from where we get the PATH Variables
+const envvars = ['Debugging', 'Linpack', 'NirLauncher', 'PrimeNinetyFive', 'Tasks', 'Installation', 'KMS', 'SysInternals', 'WinPE'];
+// Part of myCustomSetup
 let ffmpegurl, cmderurl;
 // Define ffmpegurl, cmderurl and data
 
 // Imports
 const { exec, execSync } = require('child_process');
 const { get } = require('https');
-const { appendFileSync } = require('fs');
+const { appendFileSync, existsSync, writeFileSync } = require('fs');
 const readline = require('readline');
+const { join } = require('path');
 
 // Short form
 const input = process.stdin;
@@ -23,7 +26,7 @@ Hello,
 To install Cmder, we need to follow a few steps.
 
 I will start an Install Prompt in your Default Browser.
-Please save it to the current directory, i.e. ${process.cwd()}
+Please save it to the current directory, i.e. ${__dirname}
 
 NOTE:- The filename should be "cmder.zip" (Case Sensitive)
 
@@ -34,6 +37,34 @@ You DO NOT need to unzip it :)
 You can copy paste it from there.
 
 PS:- %USERPROFILE%\\Downloads === C:\\Users\\<Username>\\Downloads**
+`;
+const FileHash = `
+$File=$args[0]
+$Hash=$args[1]
+$Algorithm=$args[2]
+
+if($File -eq $null -or $Hash -eq $null) {
+    Write "Either FileName or Hash has not been provided, please check"
+    exit 404
+}
+
+if($Algorithm -eq $null) {
+    Write "Algorithm has not been provided, going to default SHA256"
+    $Algorithm="SHA256"
+} else {
+    Write "Algorithm has been provided, going with the provided one $Algorithm"
+}
+
+$FileHash=(Get-FileHash $File -Algorithm $Algorithm).Hash
+
+if($FileHash -eq $Hash) { Write "This is the correct File Hash... Congrats" }
+else { Write "The File Hashes don't match. Please redownload" }
+`;
+const cmder_shell = `
+@if "%cmder_init%" == "1" (goto :eof) else (set cmder_init=1)
+@pushd %CMDER_ROOT%
+@call "%CMDER_ROOT%\\vendor\\init.bat" /f
+@popd
 `;
 
 // A constant that executes the String Command given and returns the output
@@ -103,10 +134,10 @@ const installCmder = (path) => {
             await execedsync(`start "" "${cmderurl}"`);
             rl.question('Done? \n', async () => {
                 rl.close();
-                await execed(`${path} x "${process.cwd()}\\cmder.zip" *.* "${process.cwd()}\\Cmder"`)
+                await execed(`${path} x "${__dirname}\\cmder.zip" *.* "${__dirname}\\Cmder"`)
                     .on('data', (got) => console.log('Result:', got))
                     .on('error', (err) => console.log('Error:', err));
-                await execedsync(`set CmderDirectory="${process.cwd()}\\Cmder`);
+                await execedsync(`set CmderDirectory="${__dirname}\\Cmder`);
                 return resolve(true);
             });
         }, 10 * 1000);
@@ -122,12 +153,12 @@ const installFFmpeg = (path) => {
                 .on('data', (got) => appendFileSync('ffmpeg.7z', got))
                 .on('end', async () => {
                     console.log('Finished Installing. \nOpening the ZIP File');
-                    await execed(`${path} x "${process.cwd()}\\ffmpeg.7z" *.* "${process.cwd()}"`)
+                    await execed(`${path} x "${__dirname}\\ffmpeg.7z" *.* "${__dirname}"`)
                         .on('data', (got) => console.log('Result:', got))
                         .on('error', (err) => console.log('Error:', err));
                     console.log('Changing FFmpegDirectory to current directory.');
                     const filename = ffmpegurl.replace('.7z', '');
-                    await execedsync(`set FFmpegDirectory="${process.cwd()}\\${filename}"`);
+                    await execedsync(`set FFmpegDirectory="${__dirname}\\${filename}"`);
                     return resolve(true);
                 })
                 .on('error', (err) => {
@@ -145,9 +176,9 @@ const questions = (what, type = true, path) => {
         output,
     });
     return new Promise((resolve) => {
-        rl.question(`${what}\n`, async (answer) => {
+        rl.question(`${what} \nNote that the ENV Vars have already been set. \n`, async (answer) => {
             rl.close();
-            answer = answer.toLowerCase();
+            answer = answer.toLowerCase().charAt(0);
             if(answer == 'n') await type ? installFFmpeg(path) : installCmder(path);
             else if(answer == 'y') console.log('Ok, moving ahead :)');
             else return questions('Please enter a valid answer.', type, path);
@@ -157,50 +188,71 @@ const questions = (what, type = true, path) => {
 };
 
 const myCustomSetup = async (userVars) => {
-    let allvars = [];
-    const envvars = ['Debugging', 'Linpack', 'NirLauncher', 'PrimeNinetyFive', 'Tasks', 'Installation', 'KMS'];
-    const pathVars = new Promise((resolve) => {
+    new Promise((resolve) => {
+        let allvars = '';
         envvars.forEach(async (envVar) => {
-            const eachvar = await (await execedsync(`set ${envVar}`)).split('=')[1];
-            allvars = [...allvars, eachvar.trim().endsWith(';') ? eachvar.trim() : `${eachvar.trim()};`];
+            const eachvar = await execedsync(`echo %${envVar}%`);
+            allvars = `${allvars}${eachvar.trim().endsWith(';') ? eachvar.trim() : `${eachvar.trim()};`}`;
             resolve(allvars);
         });
-    });
-
-    pathVars.then(() => {
+    }).then((allvars) => {
         execed(`setx PATH "${userVars}${allvars}"`)
             .on('data', console.log)
             .on('error', console.log);
     });
 
-    const defaultgiteditor = await (await execedsync('set GitDefaultEditor')).split('=')[1];
-    const email = await (await execedsync('set GitEmail')).split('=')[1];
-    const name = await (await execedsync('set GitName')).split('=')[1];
+    const defaultgiteditor = await execedsync('echo %GitDefaultEditor%');
+    const email = await execedsync('echo %GitEmail%');
+    const name = await execedsync('echo %GitName%');
+    const systemroot = await execedsync('echo %SystemRoot%');
+    const cmdnames = [
+        `git config --global core.editor "${defaultgiteditor}"`,
+        `git config --global user.name "${name}" && git config --global user.email "${email}"`,
+        'echo Yes | REG DELETE HKCR\\Directory\\Background\\shell\\cmd /v Extended',
+        'echo Yes | REG DELETE HKCR\\Directory\\Background\\shell\\cmd /v HideBasedOnVelocityId',
+        'DISM /Online /Enable-Feature /Featurename:Microsoft-Windows-Subsystem-Linux',
+    ];
 
-    await execedsync(`git config --global core.editor "${defaultgiteditor}"`);
-    console.log(`Set the default Git editor to ${defaultgiteditor}`);
+    for(const install of ['node-gyp', 'electron-fix']) await execedsync(`npm i -g ${install}`);
+    for(const cmdname of cmdnames) await execedsync(cmdname);
 
-    await execedsync(`git config --global user.name "${name}" && git config --global user.email "${email}"`);
-    console.log('Set the default Git Email...');
+    if(!existsSync(`${systemroot}\\System32\\FileHash.ps1`)) {
+        console.log('FileHash.ps1 doesn\'t exist, creating the file');
+        writeFileSync(`${systemroot}\\System32\\FileHash.ps1`, FileHash);
+    }
+    if(!existsSync(join(__dirname, './Cmder', '/cmder_shell.bat'))) {
+        console.log('cmder_shell.bat doesn\'t exist, creating it');
+        writeFileSync(join(__dirname, './Cmder', '/cmder_shell.bat'), cmder_shell);
+    }
+
+    const autorun_exists = await execedsync('REG QUERY "HKEY_CURRENT_USER\\Software\\Microsoft\\Command Processor" /v AutoRun');
+    if(autorun_exists.includes('ERROR:')) await execedsync('REG ADD "HKEY_CURRENT_USER\\Software\\Microsoft\\Command Processor" /v AutoRun /d cmder_shell.bat');
 };
 
 ffmpegversion.then(() => {
     cmderversion.then(() => {
         dataed.then(async () => {
             const [ systemVars, userVars ] = data;
-            const ffmpeg = await (await execedsync('set FFmpegInstallDirectory')).split('=')[1];
-            const cmder = await (await execedsync('set CmderInstallDirectory')).split('=')[1];
-            const programFiles = await (await execedsync('set ProgramFiles')).split('=')[1].replace('ProgramFiles(x86)', '');
-            let mongodb = await (await execedsync('choco search mongodb -e')).split('mongodb ')[1].split(' ')[0].split('.');
-            mongodb = `${mongodb[0]}.${mongodb[1]}`;
-            execed(`setx PATH "${systemVars}${ffmpeg.trim()};${cmder.trim()};${`${programFiles.trim()}\\MongoDB\\Server\\${mongodb.trim()}\\bin`}" /m`) // Trim and set the variables, so that there are no whitespaces.
+            const ffmpeg = await execedsync('echo %FFmpegInstallDirectory%');
+            const cmder = await execedsync('echo %CmderInstallDirectory%');
+            const programFiles = await execedsync('echo %ProgramFiles%');
+            let mongodb = '';
+            let exists = await execedsync('choco search mongodb -e');
+            if(exists.includes('0 packages found.')) {
+                exists = false;
+            } else {
+                exists = true;
+                mongodb = await (await execedsync('choco search mongodb -e')).split('mongodb ')[1].split(' ')[0].split('.');
+                mongodb = `${mongodb[0]}.${mongodb[1]}`;
+            }
+            execed(`setx PATH "${systemVars}${ffmpeg.trim()};${cmder.trim()};${exists ? `${programFiles.trim()}\\MongoDB\\Server\\${mongodb.trim()}\\bin` : ''} /m`) // Trim and set the variables, so that there are no whitespaces.
                 .on('data', console.log)
                 .on('error', console.log);
             execed(`setx %ConEmuDir% "${cmder.trim()}\\vendor\\conemu-maximus5" /m`)
                 .on('data', console.log)
                 .on('error', console.log);
-            await questions('Did you install FFmpeg? Type "Y" for Yes and "N" for No. \nIf you haven\'t installed, this will install it.', true, `${programFiles.trim()}\\7-Zip\\7z.exe`);
-            await questions('Did you install Cmder? Type "Y" for Yes and "N" for No. \nIf you haven\'t installed, this will install it', false, `${programFiles.trim()}\\7-Zip\\7z.exe`);
+            await questions('Did you install FFmpeg? Type "Y" for Yes and "N" for No. \nIf you haven\'t installed, this will install it.', true, `"${programFiles.trim()}\\7-Zip\\7z.exe"`);
+            await questions('Did you install Cmder? Type "Y" for Yes and "N" for No. \nIf you haven\'t installed, this will install it', false, `"${programFiles.trim()}\\7-Zip\\7z.exe"`);
 
             // You can comment out the below line, as it is meant for my purpose, i.e. my custom ENV Vars
             myCustomSetup(userVars);
