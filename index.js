@@ -1,13 +1,14 @@
 // Do not touch
 // This is guarenteed to work on Windows 10, unless the Registry has been modified explicitly.
-// This file, gets the ENV Variables and sets them to a Batch Constant
+// This file, gets the ENV Variables and sets them to the Environment Variables
 
 const commands = ['"HKLM\\System\\CurrentControlSet\\Control\\Session Manager\\Environment" /v Path', 'HKCU\\Environment /v Path'];
 // Path in the Registry, from where we get the PATH Variables
 const envvars = ['Debugging', 'Linpack', 'NirLauncher', 'PrimeNinetyFive', 'Tasks', 'Installation', 'KMS', 'SysInternals', 'WinPE'];
+const globalinstalls = ['node-gyp', 'electron-fix'];
 // Part of myCustomSetup
 let ffmpegurl, cmderurl;
-// Define ffmpegurl, cmderurl and data
+// Define ffmpegurl, cmderurl
 
 // Imports
 const { exec, execSync } = require('child_process');
@@ -38,6 +39,8 @@ You can copy paste it from there.
 
 PS:- %USERPROFILE%\\Downloads === C:\\Users\\<Username>\\Downloads**
 `;
+// My Custom File Scripts
+// Powershell script that checks if the given filehashes match
 const FileHash = `
 $File=$args[0]
 $Hash=$args[1]
@@ -60,25 +63,31 @@ $FileHash=(Get-FileHash $File -Algorithm $Algorithm).Hash
 if($FileHash -eq $Hash) { Write "This is the correct File Hash... Congrats" }
 else { Write "The File Hashes don't match. Please redownload" }
 `;
+// Cmder_shell.bat, mentioned here https://github.com/cmderdev/cmder/wiki/Cmder's-shell-in-other-terminals
 const cmder_shell = `
 @if "%cmder_init%" == "1" (goto :eof) else (set cmder_init=1)
 @pushd %CMDER_ROOT%
 @call "%CMDER_ROOT%\\vendor\\init.bat" /f
 @popd
 `;
+// MessageBox Script
+const MessageBox = `
+$title=$args[0]
+$message=$args[1]
+$button='OK'
+
+if($title -eq $null -or $message -eq $null) {
+    Write "Either Title or Message have not been provided. Please check"
+    exit 404
+}
+
+Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.MessageBox]::Show($message, $title, $button, [System.Windows.Forms.MessageBoxIcon]::Information);
+`;
 
 // A constant that executes the String Command given and returns the output
 const execedsync = async (command) => {
     const data = await execSync(command).toString();
     return data;
-};
-
-// A constant that executes the String Command given and return the Stdout to us, allowing better flexibility
-const execed = (command) => {
-    const data = exec(command, (err) => {
-        if(err) return console.error('ERROR:', err);
-    });
-    return data.stdout;
 };
 
 // Returns a Promise, and sets the FFmpeg URL
@@ -134,9 +143,7 @@ const installCmder = (path) => {
             await execedsync(`start "" "${cmderurl}"`);
             rl.question('Done? \n', async () => {
                 rl.close();
-                await execed(`${path} x "${__dirname}\\cmder.zip" *.* "${__dirname}\\Cmder"`)
-                    .on('data', (got) => console.log('Result:', got))
-                    .on('error', (err) => console.log('Error:', err));
+                console.log(await execedsync(`${path} x "${__dirname}\\cmder.zip" *.* "${__dirname}\\Cmder"`));
                 await execedsync(`set CmderDirectory="${__dirname}\\Cmder`);
                 return resolve(true);
             });
@@ -153,9 +160,7 @@ const installFFmpeg = (path) => {
                 .on('data', (got) => appendFileSync('ffmpeg.7z', got))
                 .on('end', async () => {
                     console.log('Finished Installing. \nOpening the ZIP File');
-                    await execed(`${path} x "${__dirname}\\ffmpeg.7z" *.* "${__dirname}"`)
-                        .on('data', (got) => console.log('Result:', got))
-                        .on('error', (err) => console.log('Error:', err));
+                    console.log(await execedsync(`${path} x "${__dirname}\\ffmpeg.7z" *.* "${__dirname}"`));
                     console.log('Changing FFmpegDirectory to current directory.');
                     const filename = ffmpegurl.replace('.7z', '');
                     await execedsync(`set FFmpegDirectory="${__dirname}\\${filename}"`);
@@ -195,40 +200,46 @@ const myCustomSetup = async (userVars) => {
             allvars = `${allvars}${eachvar.trim().endsWith(';') ? eachvar.trim() : `${eachvar.trim()};`}`;
             resolve(allvars);
         });
-    }).then((allvars) => {
-        execed(`setx PATH "${userVars}${allvars}"`)
-            .on('data', console.log)
-            .on('error', console.log);
-    });
+    }).then(async (allvars) => console.log(await execedsync(`setx PATH "${userVars}${allvars}"`)));
 
     const defaultgiteditor = await execedsync('echo %GitDefaultEditor%');
     const email = await execedsync('echo %GitEmail%');
     const name = await execedsync('echo %GitName%');
     const systemroot = await execedsync('echo %SystemRoot%');
+    const tasks = await execedsync('echo %Tasks%');
     const cmdnames = [
         `git config --global core.editor "${defaultgiteditor}"`,
-        `git config --global user.name "${name}" && git config --global user.email "${email}"`,
+        `git config --global user.name "${name}"`,
+        `git config --global user.email "${email}"`,
         'echo Yes | REG DELETE HKCR\\Directory\\Background\\shell\\cmd /v Extended',
         'echo Yes | REG DELETE HKCR\\Directory\\Background\\shell\\cmd /v HideBasedOnVelocityId',
         'DISM /Online /Enable-Feature /Featurename:Microsoft-Windows-Subsystem-Linux',
+        'REG ADD "HKLM\\Software\\Microsoft\\Windows NT\\CurrentVersion\\SystemRestore" /v SystemRestorePointCreationFrequency /d 0x0 /t REG_DWORD',
+        `SCHTASKS /Create /SC Onstart /TN "System Restore Point" /TR "${tasks}\\SystemRestore.bat"`
+    ];
+    const filenames = [
+        `${systemroot}\\System32\\FileHash.ps1`,
+        join(__dirname, './Cmder', '/cmder_shell.bat'),
+        `${systemroot}\\System32\\MessageBox.ps1`
+    ];
+    const filevalues = [
+        FileHash,
+        cmder_shell,
+        MessageBox,
     ];
 
-    for(const install of ['node-gyp', 'electron-fix']) await execedsync(`npm i -g ${install}`);
-    for(const cmdname of cmdnames) await execedsync(cmdname);
+    filenames.forEach((filename, i) => {
+        if(!existsSync(filename)) writeFileSync(filename, filevalues[i]);
+    });
 
-    if(!existsSync(`${systemroot}\\System32\\FileHash.ps1`)) {
-        console.log('FileHash.ps1 doesn\'t exist, creating the file');
-        writeFileSync(`${systemroot}\\System32\\FileHash.ps1`, FileHash);
-    }
-    if(!existsSync(join(__dirname, './Cmder', '/cmder_shell.bat'))) {
-        console.log('cmder_shell.bat doesn\'t exist, creating it');
-        writeFileSync(join(__dirname, './Cmder', '/cmder_shell.bat'), cmder_shell);
-    }
+    for(const globalinstall of globalinstalls) await execedsync(`npm i -g ${globalinstall}`);
+    for(const cmdname of cmdnames) await execedsync(cmdname);
 
     const autorun_exists = await execedsync('REG QUERY "HKEY_CURRENT_USER\\Software\\Microsoft\\Command Processor" /v AutoRun');
     if(autorun_exists.includes('ERROR:')) await execedsync('REG ADD "HKEY_CURRENT_USER\\Software\\Microsoft\\Command Processor" /v AutoRun /d cmder_shell.bat');
 };
 
+// Callback Hell :joy:
 ffmpegversion.then(() => {
     cmderversion.then(() => {
         dataed.then(async () => {
@@ -245,12 +256,8 @@ ffmpegversion.then(() => {
                 mongodb = await (await execedsync('choco search mongodb -e')).split('mongodb ')[1].split(' ')[0].split('.');
                 mongodb = `${mongodb[0]}.${mongodb[1]}`;
             }
-            execed(`setx PATH "${systemVars}${ffmpeg.trim()};${cmder.trim()};${exists ? `${programFiles.trim()}\\MongoDB\\Server\\${mongodb.trim()}\\bin` : ''} /m`) // Trim and set the variables, so that there are no whitespaces.
-                .on('data', console.log)
-                .on('error', console.log);
-            execed(`setx %ConEmuDir% "${cmder.trim()}\\vendor\\conemu-maximus5" /m`)
-                .on('data', console.log)
-                .on('error', console.log);
+            console.log(await execedsync(`setx PATH "${systemVars}${ffmpeg.trim()};${cmder.trim()};${exists ? `${programFiles.trim()}\\MongoDB\\Server\\${mongodb.trim()}\\bin` : ''} /m`)); // Trim and set the variables, so that there are no whitespaces.
+            console.log(await execedsync(`setx %ConEmuDir% "${cmder.trim()}\\vendor\\conemu-maximus5" /m`));
             await questions('Did you install FFmpeg? Type "Y" for Yes and "N" for No. \nIf you haven\'t installed, this will install it.', true, `"${programFiles.trim()}\\7-Zip\\7z.exe"`);
             await questions('Did you install Cmder? Type "Y" for Yes and "N" for No. \nIf you haven\'t installed, this will install it', false, `"${programFiles.trim()}\\7-Zip\\7z.exe"`);
 

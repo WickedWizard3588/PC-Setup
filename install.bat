@@ -21,7 +21,6 @@ PAUSE
 
 echo Checking Internet Connection
 Ping www.google.nl -n 1 -w 1000
-cls
 if errorlevel 1 (
     echo You have not connected to the Internet. I will quit the Script. Please start again after connecting to the Internet
     PAUSE
@@ -68,11 +67,11 @@ cls
 :BSOD
     if defined BSODLogging (
         echo Setting your BSOD Logging Type to %BSODLogging%
-        REG ADD "HKLM\System\CurrentControlSet\Control\fCrashControl" /v CrashDumpEnabled /d %BSODLogging% /t REG_DWORD /f
+        REG ADD "HKLM\System\CurrentControlSet\Control\CrashControl" /v CrashDumpEnabled /d %BSODLogging% /t REG_DWORD /f
         goto Env
     ) else (
         set /p BSODQuestion=BSODLogging Variable has not been set. Do you want me to set it to the default Small Memory Dump (Y) or leave it (N) 
-        if /i "%BSODQuestion:~,1%" EQU "Y" REG ADD "HKLM\System\CurrentControlSet\Control\fCrashControl" /v CrashDumpEnabled /d 0x3 /t REG_DWORD /f && goto Env
+        if /i "%BSODQuestion:~,1%" EQU "Y" REG ADD "HKLM\System\CurrentControlSet\Control\CrashControl" /v CrashDumpEnabled /d 0x3 /t REG_DWORD /f && goto Env
         if /i "%BSODQuestion:~,1%" EQU "N" echo "Ok, skipping" && goto Env
         echo Please type Y/N
         goto BSOD
@@ -89,8 +88,8 @@ cls
     echo You can uninstall it later, through a prompt I'll give you :)
     PAUSE
 
-    echo Installing 7-Zip.
-    choco install 7zip
+    echo Installing 7-Zip and Nodejs-LTS
+    choco install 7zip nodejs-lts
 
     call refreshenv.cmd
 
@@ -117,7 +116,6 @@ cls
     echo Setting Cmder Vars
     setx CMDER_ROOT %CmderInstallDirectory% /m
 
-
     echo Copying FFmpeg
     robocopy %FFmpegDirectory% %FFmpegInstallDirectory% /E /V
     echo Set FFmpeg Vars Already
@@ -127,8 +125,16 @@ cls
 
 :7zip
     set /p zip=Do you want to uninstall 7zip? (Y/N) 
-    if /i "%zip:~,1%" EQU "Y" choco uninstall 7zip && goto choco
+    if /i "%zip:~,1%" EQU "Y" choco uninstall 7zip && exit
     if /i "%zip:~,1%" EQU "N" echo Exiting && exit
     echo Please enter a valid answer. Reprompting
     goto 7zip
+:--------------------------------------
+
+:restart
+    set /p reboot=You need to reboot to finish the installation. Shall I do it now? (Y/N) 
+    if /i "%reboot:~,1%" EQU "Y" echo Rebooting in 1 minute && shutdown /r /t 60 /c "Complete installation"
+    if /i "%reboot:~,1%" EQU "N" echo Please manually reboot later && exit
+    echo Please enter a valid answer. Reprompting
+    goto restart
 :--------------------------------------

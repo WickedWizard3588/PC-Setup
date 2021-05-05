@@ -8,12 +8,12 @@ You just need to download and unzip this repo, rename the `config.example.bat` t
 
 This script also sets your BSOD (Blue Screen of Death) Dump Files to the `MiniDump` (by default) option, so its easy for you to debug and fix them ;)
 
-PS:- If you're a fan of [Cmder](https://cmder.net/) and [FFmpeg](https://www.ffmpeg.org/), this app automatically installs Cmder and FFmpeg for you, including the Environment Variables. 
+PS:- If you use [Cmder](https://cmder.net/) and [FFmpeg](https://www.ffmpeg.org/), this app automatically installs Cmder and FFmpeg for you, including the Environment Variables. 
 
 ### Prerequisites
 None
 
-Please do not download the Source Code from the repo directly, since it is in the middle of a rewrite. Instead, download the [Latest Release](https://github.com/WickedWizard3588/PC-Setup/releases)
+Please do not download the Source Code from the repo directly, since it is untested and unreliable. Instead, download the [Latest Release](https://github.com/WickedWizard3588/PC-Setup/releases), which is 100% tested.
 
 _If you find a bug, or have new Ideas, please feel free to open an issue or PR or contact me through [Discord](http://discord.com/users/719421577086894101)_
 
