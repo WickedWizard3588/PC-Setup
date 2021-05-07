@@ -4,8 +4,14 @@ node_modules
 # Files installed by script, like FFmpeg and Cmder
 *.7z
 *.zip
+*.msi
+*.exe
+*.appx
 ffmpeg*.*
 Cmder*.*
 
 # Test Files
 test*.*
+
+# New Code
+New Code

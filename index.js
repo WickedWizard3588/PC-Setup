@@ -91,45 +91,51 @@ const execedsync = async (command) => {
 };
 
 // Returns a Promise, and sets the FFmpeg URL
-const ffmpegversion = new Promise((resolve) => {
-    get('https://www.gyan.dev/ffmpeg/builds/release-version', (response) => {
-        response
-            .on('data', (data) => {
-                data = data.toString();
-                ffmpegurl = `https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-${data}-full_build.7z`;
-                console.log('Updated FFmpeg URL');
-                resolve(ffmpegurl);
-            });
-    });
-});
-
-// Returns a Promise and gets the Latest Cmder Release
-const cmderversion = new Promise((resolve) => {
-    exec('curl -s https://api.github.com/repos/cmderdev/cmder/releases/latest', (err, results) => {
-        results = JSON.parse(results);
-        results.assets.forEach((result) => {
-            if(result.name != 'cmder_mini.zip') return;
-            cmderurl = result.browser_download_url;
-            resolve(cmderurl);
+const ffmpegversion = () => {
+    return new Promise((resolve) => {
+        get('https://www.gyan.dev/ffmpeg/builds/release-version', (response) => {
+            response
+                .on('data', (data) => {
+                    data = data.toString();
+                    ffmpegurl = `https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-${data}-full_build.7z`;
+                    console.log('Updated FFmpeg URL');
+                    resolve(ffmpegurl);
+                });
         });
     });
-});
+};
+
+// Returns a Promise and gets the Latest Cmder Release
+const cmderversion = () => {
+    return new Promise((resolve) => {
+        exec('curl -s https://api.github.com/repos/cmderdev/cmder/releases/latest', (err, results) => {
+            results = JSON.parse(results);
+            results.assets.forEach((result) => {
+                if(result.name != 'cmder_mini.zip') return;
+                cmderurl = result.browser_download_url;
+                resolve(cmderurl);
+            });
+        });
+    });
+};
 
 let data = [];
 // Returns a promise and sets the Environment Variables
-const dataed = new Promise((resolve) => {
-    commands.forEach((command) => {
-        execedsync(`REG QUERY ${command}`).then((datas) => {
-            datas = datas.split('REG_EXPAND_SZ    ')[1] || datas.split('REG_SZ    ')[1];
-            if(!datas) {
-                console.log('Datas error:', data);
-                process.exit();
-            }
-            data = [...data, datas.trim().endsWith(';') ? datas.trim() : `${datas.trim()};`];
-            return resolve(data);
+const dataed = () => {
+    return new Promise((resolve) => {
+        commands.forEach((command) => {
+            execedsync(`REG QUERY ${command}`).then((datas) => {
+                datas = datas.split('REG_EXPAND_SZ    ')[1] || datas.split('REG_SZ    ')[1];
+                if(!datas) {
+                    console.log('Datas error:', data);
+                    process.exit();
+                }
+                data = [...data, datas.trim().endsWith(';') ? datas.trim() : `${datas.trim()};`];
+                return resolve(data);
+            });
         });
     });
-});
+};
 
 // Installs Cmder from the CmderURL
 const installCmder = (path) => {
@@ -208,14 +214,23 @@ const myCustomSetup = async (userVars) => {
     const systemroot = await execedsync('echo %SystemRoot%');
     const tasks = await execedsync('echo %Tasks%');
     const cmdnames = [
+        // Git
         `git config --global core.editor "${defaultgiteditor}"`,
         `git config --global user.name "${name}"`,
         `git config --global user.email "${email}"`,
+        // Registry Modifications
         'echo Yes | REG DELETE HKCR\\Directory\\Background\\shell\\cmd /v Extended',
         'echo Yes | REG DELETE HKCR\\Directory\\Background\\shell\\cmd /v HideBasedOnVelocityId',
-        'DISM /Online /Enable-Feature /Featurename:Microsoft-Windows-Subsystem-Linux',
+        `SCHTASKS /Create /SC Onstart /TN "System Restore Point" /TR "${tasks}\\SystemRestore.bat"`,
         'REG ADD "HKLM\\Software\\Microsoft\\Windows NT\\CurrentVersion\\SystemRestore" /v SystemRestorePointCreationFrequency /d 0x0 /t REG_DWORD',
-        `SCHTASKS /Create /SC Onstart /TN "System Restore Point" /TR "${tasks}\\SystemRestore.bat"`
+        // WSL (Windows SubSystem for Linux)
+        'DISM /Online /Enable-Feature /Featurename:Microsoft-Windows-Subsystem-Linux /all /norestart',
+        'DISM /Online /Enable-Feature /Featurename:VirtualMachinePlatform /all /norestart',
+        'curl -o wsl.msi https://wslstorestorage.blob.core.windows.net/wslblob/wsl_update_x64.msi',
+        'msiexec /i wsl.msi',
+        'wsl --set-default-version 2',
+        'curl.exe -L -o ubuntu.appx https://aka.ms/wslubuntu2004',
+        'powershell -Command "Add-AppxPackage .\\ubuntu.appx"',
     ];
     const filenames = [
         `${systemroot}\\System32\\FileHash.ps1`,

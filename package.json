@@ -20,6 +20,9 @@
 		"type": "git",
 		"url": "git+https://github.com/WickedWizard3588/PC-Setup.git"
 	},
+	"scripts": {
+		"start": "install.bat"
+	},
 	"dependencies": {},
 	"devDependencies": {},
 	"peerDependencies": {},
