@@ -3,6 +3,7 @@ const { existsSync } = require('fs');
 const { join } = require('path');
 
 // Functions
+const { questions, execedsync } = require('./Functions');
 const { getEnvironmentVariables } = require('./Functions/env');
 const { writeConfig } = require('./Functions/config');
 
@@ -13,6 +14,10 @@ const { installCmderWithConfig, installCmderWithoutConfig } = require('./Install
 const { installFFmpegWithConfig, installFFmpegWithoutConfig } = require('./Installation/ffmpeg');
 
 (async () => {
+    if(process.platform != 'win32') {
+        console.log(`This is meant to run on Windows only and not on ${process.platform}. Exiting...`);
+        process.exit();
+    }
     const envVars = await getEnvironmentVariables();
     const [ systemVars, userVars ] = envVars;
     if(existsSync(join(process.cwd(), './config.json'))) {
@@ -29,4 +34,8 @@ const { installFFmpegWithConfig, installFFmpegWithoutConfig } = require('./Insta
         const ffmpeg = await installFFmpegWithoutConfig(updatedenv[0], updatedenv[1]);
         await writeConfig(apps, wsl, cmder, ffmpeg);
     }
+    let reboot = await questions('Do you want to reboot to finish the installation?');
+    reboot = reboot.charAt(0) === 'y' ? true : false;
+    if(reboot) await execedsync('shutdown.exe /s /t 60 /c "Reboot after apps installation."');
+    else process.exit();
 })();
