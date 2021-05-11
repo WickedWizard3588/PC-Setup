@@ -70,11 +70,11 @@ Moreover, you can also set Environment Variables (like `PATH`) for Cmder and FFm
 5. You're done.
 
 ## TODO
-[ ] Allow changing behaviour of Alt + Tab
-[ ] Allow Creating a System Restore Point at every startup
-[ ] Check if Git has been installed, and set Name, Email and Core Editor
-[ ] Allow Cmder [Autoruns](https://github.com/cmderdev/cmder/wiki/Cmder's-shell-in-other-terminals#add-to-autorun).
-[ ] Allow you own custom script to be pasted in the `System32` Directory
+- [ ] Allow changing behaviour of Alt + Tab
+- [ ] Allow Creating a System Restore Point at every startup
+- [ ] Check if Git has been installed, and set Name, Email and Core Editor
+- [ ] Allow Cmder [Autoruns](https://github.com/cmderdev/cmder/wiki/Cmder's-shell-in-other-terminals#add-to-autorun).
+- [ ] Allow you own custom script to be pasted in the `System32` Directory
 
 ## License
 
