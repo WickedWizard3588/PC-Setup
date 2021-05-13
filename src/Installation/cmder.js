@@ -13,7 +13,7 @@ const { log, execedsync, questions } = require('../Functions');
 const getCmder = (finaldirectory, environmentVariables, envType, systemVars, userVars, contextmenu) => {
     envType = envType.toLowerCase();
     return new Promise((resolve) => {
-        execedsync('curl -s https://api.github.com/repos/cmderdev/cmder/releases/latest').then(async (results) => {
+        execedsync('curl -s https://api.github.com/repos/cmderdev/cmder/releases/latest').then((results) => {
             results = JSON.parse(results);
             results.assets.forEach(async (result) => {
                 if(result.name != 'cmder_mini.zip') return;
@@ -46,61 +46,56 @@ const getCmder = (finaldirectory, environmentVariables, envType, systemVars, use
  * @param {String} userVars
  * @returns {Promise<Boolean>}
  */
-const installCmderWithConfig = (systemVars, userVars) => {
-    return new Promise((resolve) => {
-        if(!config.cmder || Object.keys(config.cmder).length === 0 || typeof config.cmder != 'object' || !config.cmder.finalDirectory) {
-            log('Error', 'config.cmder either doesn\'t exist, or it isn\'t of type Object or is an empty Object, or the final directory doesn\'t exist');
-            resolve(true);
-        } else {
-            log('Info', 'Installing Cmder');
-            getCmder(
-                config.cmder.finalDirectory.endsWith('\\') ? config.cmder.finalDirectory : `${config.cmder.finalDirectory}\\`,
-                config.cmder.environmentVariables,
-                config.cmder.global,
-                systemVars,
-                userVars,
-                config.cmder['context-menu'],
-            ).then(() => resolve(true));
-        }
-    });
+const installCmderWithConfig = async (systemVars, userVars) => {
+    if(!config.cmder || Object.keys(config.cmder).length === 0 || typeof config.cmder != 'object' || !config.cmder.finalDirectory) {
+        log('Error', 'config.cmder either doesn\'t exist, or it isn\'t of type Object or is an empty Object, or the final directory doesn\'t exist');
+        return true;
+    }
+    log('Info', 'Installing Cmder');
+    await getCmder(
+        config.cmder.finalDirectory.endsWith('\\') ? config.cmder.finalDirectory : `${config.cmder.finalDirectory}\\`,
+        config.cmder.environmentVariables,
+        config.cmder.global,
+        systemVars,
+        userVars,
+        config.cmder['context-menu'],
+    );
+    return true;
 };
 
 /**
  * @param {String} systemVars
  * @param {String} userVars
- * @returns {Promise<Array<String|Boolean>>}
+ * @returns {Promise<Array<String|Boolean>|Boolean>}
  */
-const installCmderWithoutConfig = (systemVars, userVars) => {
-    return new Promise((resolve) => {
-        questions('Do you want me to install Cmder for you?').then(async (answer) => {
-            if(answer.charAt(0) === 'y') {
-                log('Info', 'Installing Cmder');
-                questions('Where do you want to place Cmder after installing?').then(async (finaldir) => {
-                    const environmentVariables = await questions('Do you want to set the Environment Variables for Cmder?');
-                    const globalenv = await questions('Should Cmder be set at a Global Level?');
-                    const contextmenu = await questions('Do you want the Context Menu option for Cmder?');
-                    getCmder(
-                        finaldir.endsWith('\\') ? finaldir : `${finaldir}\\`,
-                        environmentVariables.charAt(0) == 'y' ? true : false,
-                        globalenv.charAt(0) == 'y' ? 'system' : 'user',
-                        systemVars,
-                        userVars,
-                        contextmenu.charAt(0) == 'y' ? true : false,
-                    ).then(() => {
-                        resolve([
-                            finaldir,
-                            environmentVariables.charAt(0) == 'y' ? true : false,
-                            globalenv.charAt(0) == 'y' ? true : false,
-                            contextmenu.charAt(0) == 'y' ? true : false,
-                        ]);
-                    });
-                });
-            } else {
-                log('info', 'Ok, will skip Cmder installation');
-                resolve(true);
-            }
-        });
-    });
+const installCmderWithoutConfig = async (systemVars, userVars) => {
+    const answer = await questions('Do you want me to install Cmder for you?');
+    if(answer.charAt(0) === 'y') {
+        log('Info', 'Installing Cmder');
+        const finaldir = await questions('Where do you want to place Cmder after installing?');
+        let environmentVariables = await questions('Do you want to set the Environment Variables for Cmder?');
+        environmentVariables = environmentVariables.charAt(0) == 'y' ? true : false;
+        let globalenv = await questions('Should Cmder be set at a Global Level?');
+        globalenv = globalenv.charAt(0) == 'y' ? 'system' : 'user';
+        let contextmenu = await questions('Do you want the Context Menu option for Cmder?');
+        contextmenu = contextmenu.charAt(0) == 'y' ? true : false;
+        await getCmder(
+            finaldir.endsWith('\\') ? finaldir : `${finaldir}\\`,
+            environmentVariables,
+            globalenv,
+            systemVars,
+            userVars,
+            contextmenu,
+        );
+        return [
+            finaldir,
+            environmentVariables,
+            globalenv,
+            contextmenu,
+        ];
+    }
+    log('info', 'Ok, will skip Cmder installation');
+    return true;
 };
 
 module.exports = {

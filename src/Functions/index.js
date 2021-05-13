@@ -8,7 +8,7 @@ const output = process.stdout;
  * @returns {Promise<String>}
  */
 const execedsync = async (command) => {
-    const data = await execSync(command).toString();
+    const data = await (await execSync(command).toString()).trim();
     return data;
 };
 

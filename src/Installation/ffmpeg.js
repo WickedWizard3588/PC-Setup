@@ -22,18 +22,18 @@ const ffmpeg = (finalDirectory, environmentVariables, envGlobal, systemVars, use
                 await execedsync(`robocopy "${dir}" "${finalDirectory}" /E /V /MOVE`);
                 await execedsync('echo Y | del ffmpeg.7z');
             });
-            if(!environmentVariables) return resolve([
+            if(!environmentVariables) return [
                 finalDirectory,
                 false,
                 false,
-            ]);
+            ];
             await execedsync(`setx PATH "${envGlobal ? systemVars : userVars}${finalDirectory}\\bin" ${envGlobal ? '/m' : ''}`);
             const zip = await questions('Do you want to uninstall 7-Zip?');
             if(zip.charAt(0) === 'y') await execedsync('choco uninstall 7zip');
             resolve([
                 finalDirectory,
-                environmentVariables ? true : false,
-                envGlobal ? true : false,
+                environmentVariables,
+                envGlobal,
             ]);
         });
     });
@@ -44,22 +44,20 @@ const ffmpeg = (finalDirectory, environmentVariables, envGlobal, systemVars, use
  * @param {String} userVars
  * @returns {Promise<Boolean>}
  */
-const installFFmpegWithConfig = (systemVars, userVars) => {
+const installFFmpegWithConfig = async (systemVars, userVars) => {
     const config = require('../../config.json');
-    return new Promise((resolve) => {
-        if(!config.ffmpeg || Object.keys(config.ffmpeg).length === 0 || typeof config.ffmpeg != 'object' || !config.ffmpeg.finalDirectory) {
-            log('Error', 'config.ffmpeg either doesn\'t exist, or it isn\'t of type Object or is an empty Object, or the final directory doesn\'t exist');
-            resolve(true);
-        } else {
-            ffmpeg(
-                config.ffmpeg.finalDirectory,
-                config.ffmpeg.environmentVariables,
-                config.ffmpeg.global,
-                systemVars,
-                userVars,
-            ).then(() => resolve(true));
-        }
-    });
+    if(!config.ffmpeg || Object.keys(config.ffmpeg).length === 0 || typeof config.ffmpeg != 'object' || !config.ffmpeg.finalDirectory) {
+        log('Error', 'config.ffmpeg either doesn\'t exist, or it isn\'t of type Object or is an empty Object, or the final directory doesn\'t exist');
+        return true;
+    }
+    const ffmpged = await ffmpeg(
+        config.ffmpeg.finalDirectory,
+        config.ffmpeg.environmentVariables,
+        config.ffmpeg.global,
+        systemVars,
+        userVars,
+    );
+    return ffmpged;
 };
 
 /**
@@ -67,23 +65,19 @@ const installFFmpegWithConfig = (systemVars, userVars) => {
  * @param {String} userVars
  * @returns {Promise<Boolean|Array<String|Boolean>>}
  */
-const installFFmpegWithoutConfig = (systemVars, userVars) => {
-    return new Promise((resolve) => {
-        questions('Do you want to install FFmpeg').then(async (answer) => {
-            if(answer.charAt(0) === 'y') {
-                const finalDirectory = await questions('Where should the FinalDirectory for FFmpeg be?');
-                let environmentVariables = await questions('Should I set the Environment Variables for FFmpeg? (Y/N)');
-                environmentVariables = environmentVariables.charAt(0) === 'y' ? true : false;
-                let envGlobal = await questions('Should the Environment Variables be set as Global');
-                envGlobal = envGlobal.charAt(0) === 'y' ? true : false;
-                const returned = await ffmpeg(finalDirectory, environmentVariables, envGlobal, systemVars, userVars);
-                resolve(returned);
-            } else {
-                log('info', 'I will not install FFmpeg then :)');
-                resolve(true);
-            }
-        });
-    });
+const installFFmpegWithoutConfig = async (systemVars, userVars) => {
+    const answer = await questions('Do you want to install FFmpeg');
+    if(answer.charAt(0) === 'y') {
+        const finalDirectory = await questions('Where should the FinalDirectory for FFmpeg be?');
+        let environmentVariables = await questions('Should I set the Environment Variables for FFmpeg? (Y/N)');
+        environmentVariables = environmentVariables.charAt(0) === 'y' ? true : false;
+        let envGlobal = await questions('Should the Environment Variables be set as Global');
+        envGlobal = envGlobal.charAt(0) === 'y' ? true : false;
+        const returned = await ffmpeg(finalDirectory, environmentVariables, envGlobal, systemVars, userVars);
+        return returned;
+    }
+    log('info', 'I will not install FFmpeg then :)');
+    return true;
 };
 
 module.exports = {

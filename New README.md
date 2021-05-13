@@ -6,7 +6,7 @@ In One Sentence,
 > An intuitive Command Line Tool to install all your apps back on Windows. 
 
 Elaborately,
-PC-Setup, is an Command Line Tool, which is meant to install all your desired apps on Windows. It uses [Chocolatey](https://chocolatey.org/), a Package Manager for Windows to do this. It also can install 
+PC-Setup, is a Command Line Tool, which is meant to install all your desired apps on Windows. It uses [Chocolatey](https://chocolatey.org/), a Package Manager for Windows to do this. It also can install 
 
 * [Cmder](https://cmder.net/), which is an Console Emulator for Windows, created purely out of frustration because of the lack of none.
 * [FFmpeg](https://ffmpeg.org/), which is `A complete, cross-platform solution to record, convert and stream audio and video.`, as quoted in the website.
@@ -23,7 +23,7 @@ Moreover, you can also set Environment Variables (like `PATH`) for Cmder and FFm
         - First, create a `config.json` beside the `package.json` file.
         - Fill in the necessary info.
         - A Nice, Prebuilt Config.json could look like this
-        ```json
+        ```jsonc
         // Just leave an empty array/object if you don't want to run that part of the script.
         {
             // All the apps that you want to install. Just put the Chocolatey App ID from this website https://community.chocolatey.org/packages.
@@ -50,7 +50,8 @@ Moreover, you can also set Environment Variables (like `PATH`) for Cmder and FFm
                 "environmentVariables": true, // If you want to set the Environment Variables.
                 "finalDirectory": "C:\\FFmpeg", // The directory where FFmpeg should reside.
                 "global": true // If the Environment Variables need to be set at a Global Level.
-            }
+            },
+            "systemRestore": true // Set this to true if you want to create a System Restore Point at every System Startup
         }
         ```
         - Save this file, and open Command Prompt as Admin.
@@ -63,6 +64,7 @@ Moreover, you can also set Environment Variables (like `PATH`) for Cmder and FFm
         - `cd` to the Folder Containing this code.
         - `cd` to the src folder.
         - Type `install`.
+        - Reply to the prompts that follow.
         - After you're finished, it even writes a `config.json` with your permission
 
 4. It might take quite sometime, to install all the apps and complete the setup, especially if you don't have the `config.json`.
@@ -70,8 +72,7 @@ Moreover, you can also set Environment Variables (like `PATH`) for Cmder and FFm
 5. You're done.
 
 ## TODO
-- [ ] Allow changing behaviour of Alt + Tab
-- [ ] Allow Creating a System Restore Point at every startup
+- [x] Allow Creating a System Restore Point at every startup, so that you can restore back easily in case of any problems
 - [ ] Check if Git has been installed, and set Name, Email and Core Editor
 - [ ] Allow Cmder [Autoruns](https://github.com/cmderdev/cmder/wiki/Cmder's-shell-in-other-terminals#add-to-autorun).
 - [ ] Allow you own custom script to be pasted in the `System32` Directory

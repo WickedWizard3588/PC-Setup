@@ -4,7 +4,7 @@
 `PC-Setup` is a script which reinstalls all your Windows 10 apps using Chocolatey, the Package Manager for Windows.
 You just need to download and unzip this repo, rename the `config.example.bat` to `config.bat`, fill it, and run your `install.bat` file. Also, make sure that the app you are trying to install is available [here](https://community.chocolatey.org/packages).
 
-**Disclaimer:** This app indirectly modifies your PC's Registry which can be harmful. Fortunately, we create a System Restore Point just before we start, so that we can revert back easily.
+**Disclaimer:** This app directly modifies your PC's Registry which can be harmful. Fortunately, we create a System Restore Point just before we start, so that we can revert back easily.
 
 This script also sets your BSOD (Blue Screen of Death) Dump Files to the `MiniDump` (by default) option, so its easy for you to debug and fix them ;)
 
@@ -15,7 +15,7 @@ None
 
 Please do not download the Source Code from the repo directly, since it is untested and unreliable. Instead, download the [Latest Release](https://github.com/WickedWizard3588/PC-Setup/releases), which is 100% tested.
 
-_If you find a bug, or have new Ideas, please feel free to open an issue or PR or contact me through [Discord](http://discord.com/users/719421577086894101)_
+_If you find a bug, or have new Ideas, please feel free to open an issue or PR or contact me through [Discord](https://discord.com/users/719421577086894101)_
 
 ### License 
 > THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR

@@ -26,14 +26,6 @@ if not %errorlevel%==0 (
     echo I take in input from you, the user, and then try to search and install those apps.
     echo Can we continue?
     PAUSE
-    goto systemrestore
-:--------------------------------------
-
-:systemrestore
-    echo Enabling SystemRestore (If not enabled) 
-    powershell -Command "Enable-ComputerRestore -Drive C:"
-    echo Creating a System Restore Point
-    powershell -ExecutionPolicy Bypass -Command "Checkpoint-Computer -Description \"Before Apps Installation\" -RestorePointType \"MODIFY_SETTINGS\""
     goto choco
 :--------------------------------------
 
