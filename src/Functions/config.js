@@ -9,9 +9,11 @@ const { join } = require('path');
  * @param {Array<String|Boolean>|Boolean} ffmpeg
  * @param {Boolean|String} systemRestore
  * @param {Boolean|String} intelDSA
+ * @param {Boolean} intelRST
+ * @param {Boolean} asusx407uar
  * @returns {Promise<Boolean>}
  */
-const writeConfig = async (apps, wsl, cmder, ffmpeg, systemRestore, intelDSA) => {
+const writeConfig = async (apps, wsl, cmder, ffmpeg, systemRestore, intelDSA, intelRST, asusx407uar) => {
     let template = {};
     const answer = await questions('Do you want me to write a config.json for you?');
     if(answer.charAt(0) == 'y') {
@@ -22,6 +24,8 @@ const writeConfig = async (apps, wsl, cmder, ffmpeg, systemRestore, intelDSA) =>
         if(typeof ffmpeg != 'boolean') template = { ...template, "ffmpeg": { "finalDirectory": ffmpeg[0], "environmentVariables": ffmpeg[1], "global": ffmpeg[2] } };
         if(typeof systemRestore != 'string') template = { ...template, "systemRestore": true };
         if(typeof intelDSA != 'string') template = { ...template, "IntelDSA": true };
+        if(intelRST) template = { ...template, "IntelRST": true };
+        if(asusx407uar) template = { ...template, "AsusX407UAR": true };
         writeFileSync(join(process.cwd(), './config.json'), JSON.stringify(template, null, 2));
         return true;
     }

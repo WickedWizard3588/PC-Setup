@@ -51,7 +51,10 @@ Moreover, you can also set Environment Variables (like `PATH`) for Cmder and FFm
                 "finalDirectory": "C:\\FFmpeg", // The directory where FFmpeg should reside.
                 "global": true // If the Environment Variables need to be set at a Global Level.
             },
-            "systemRestore": true // Set this to true if you want to create a System Restore Point at every System Startup
+            "systemRestore": true, // Set this to true if you want to create a System Restore Point at every System Startup
+            "IntelDSA": true, // Set this to true if you have Intel Drivers and want Intel Driver and Support Assistant
+            "IntelRST": true, // Set this to true if you have Intel RST and want the app.
+            "AsusX407UAR": true // Set this to true if your PC is an Asus X407UAR
         }
         ```
         - Save this file, and open Command Prompt as Admin.

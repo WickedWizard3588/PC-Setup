@@ -14,7 +14,9 @@ const { WSLwithConfig, WSLwithoutConfig } = require('./Installation/wsl');
 const { installCmderWithConfig, installCmderWithoutConfig } = require('./Installation/cmder');
 const { installFFmpegWithConfig, installFFmpegWithoutConfig } = require('./Installation/ffmpeg');
 const { systemRestoreWithConfig, systemRestoreWithoutConfig } = require('./Installation/systemrestore');
-const { IntelDSAWithConfig, IntelDSAWithoutConfig } = require('./Installation/intel');
+const { IntelDSAWithConfig, IntelDSAWithoutConfig } = require('./Installation/intelDSA');
+const { intelRSTWithConfig, intelRSTWithoutConfig } = require('./Installation/intelRST');
+const { AsusX407UARWithConfig, AsusX407UARWithoutConfig } = require('./Installation/asusx407uar');
 
 (async () => {
     if(process.platform != 'win32') {
@@ -32,6 +34,8 @@ const { IntelDSAWithConfig, IntelDSAWithoutConfig } = require('./Installation/in
         await installFFmpegWithConfig(updatedenv[0], updatedenv[1]);
         await systemRestoreWithConfig();
         await IntelDSAWithConfig();
+        await intelRSTWithConfig();
+        await AsusX407UARWithConfig();
     } else {
         const apps = await installAppsWithoutConfig();
         const wsl = await WSLwithoutConfig();
@@ -40,10 +44,11 @@ const { IntelDSAWithConfig, IntelDSAWithoutConfig } = require('./Installation/in
         const ffmpeg = await installFFmpegWithoutConfig(updatedenv[0], updatedenv[1]);
         const systemrestore = await systemRestoreWithoutConfig();
         const intelDSA = await IntelDSAWithoutConfig();
-        await writeConfig(apps, wsl, cmder, ffmpeg, systemrestore, intelDSA);
+        const intelRST = await intelRSTWithoutConfig();
+        const asusx407uar = await AsusX407UARWithoutConfig();
+        await writeConfig(apps, wsl, cmder, ffmpeg, systemrestore, intelDSA, intelRST, asusx407uar);
     }
-    let reboot = await questions('Do you want to reboot to finish the installation? (Reboot is strongly recommended)');
-    reboot = reboot.charAt(0) === 'y' ? true : false;
-    if(reboot) await execedsync('shutdown.exe /s /t 60 /c "Reboot after apps installation."');
+    const reboot = await questions('Do you want to reboot to finish the installation? (Reboot is strongly recommended)');
+    if(reboot.charAt(0) == 'y') await execedsync('shutdown.exe /s /t 60 /c "Reboot after apps installation."');
     else process.exit();
 })();

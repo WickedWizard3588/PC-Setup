@@ -30,11 +30,10 @@ const getCmder = (finaldirectory, environmentVariables, envType, systemVars, use
                         `setx PATH "${envType === 'system' ? systemVars : userVars}${finaldirectory}"`,
                         `setx %ConEmuDir% "${finaldirectory}\\vendor\\conemu-maximus5"`,
                         `setx CMDER_ROOT ${finaldirectory}`,
-                        'call refreshenv.cmd',
                     ];
                     for(const variable of variables) await execedsync(`${variable} ${envType == 'system' ? '/m' : ''}`);
                 }
-                if(contextmenu) await execedsync(`${finaldirectory}Cmder.exe /REGISTER ${envType == 'system' ? 'ALL' : 'USER'}`);
+                if(contextmenu) await execedsync(`call refreshenv.cmd && ${finaldirectory}Cmder.exe /REGISTER ${envType == 'system' ? 'ALL' : 'USER'}`);
                 resolve(result.browser_download_url);
             });
         });
