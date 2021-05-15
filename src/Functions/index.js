@@ -1,20 +1,23 @@
 const { execSync } = require('child_process');
-const { createInterface } = require('readline');
-const input = process.stdin;
-const output = process.stdout;
 
 /**
  * @param {String} command
  * @returns {Promise<String>}
  */
 const execedsync = async (command) => {
-    const data = await (await execSync(command).toString()).trim();
+    let data;
+    try {
+        data = await execSync(command).toString();
+    } catch(e) {
+        data = e;
+    }
     return data;
 };
 
 /**
  * @param {String} type
  * @param {String} text
+ * @returns {void}
  */
 const log = (type, text) => {
     type = type.toLowerCase();
@@ -29,16 +32,16 @@ const log = (type, text) => {
 };
 
 /**
- * @param {String} what
+ * @param {String} question
  * @returns {Promise<String>}
  */
-const questions = (what) => {
-    const rl = createInterface({
-        input,
-        output,
+const questions = (question) => {
+    const rl = require('readline').createInterface({
+        input: process.stdin,
+        output: process.stdout,
     });
     return new Promise((resolve) => {
-        rl.question('\033[34m' + what, (answer) => {
+        rl.question('\033[34m' + question.trim() + '\033[39m\n', (answer) => {
             rl.close();
             resolve(answer.toLowerCase());
         });

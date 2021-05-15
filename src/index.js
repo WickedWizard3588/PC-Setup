@@ -49,6 +49,8 @@ const { AsusX407UARWithConfig, AsusX407UARWithoutConfig } = require('./Installat
         await writeConfig(apps, wsl, cmder, ffmpeg, systemrestore, intelDSA, intelRST, asusx407uar);
     }
     const reboot = await questions('Do you want to reboot to finish the installation? (Reboot is strongly recommended)');
-    if(reboot.charAt(0) == 'y') await execedsync('shutdown.exe /s /t 60 /c "Reboot after apps installation."');
-    else process.exit();
+    if(reboot.charAt(0) == 'y')
+        await execedsync('shutdown.exe /s /t 60 /c "Reboot after apps installation."');
+    else
+        process.exit();
 })();
