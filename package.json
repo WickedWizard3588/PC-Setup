@@ -23,8 +23,8 @@
 	"scripts": {
 		"start": "install.bat"
 	},
-	"devDependencies": {},
 	"dependencies": {},
+	"devDependencies": {},
 	"peerDependencies": {},
 	"optionalDependencies": {},
 	"keywords": [
